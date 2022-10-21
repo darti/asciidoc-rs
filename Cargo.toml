@@ -6,4 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+indoc = "1"
+lazy_static = "1"
 nom = "7"
+pandoc_ast = "0.8"
+log = "0.4"
+pretty_env_logger = "0.4"
+nom_locate = "4.0.0"
+
+
+[dev-dependencies]
+pandoc = "0.8"
+ctor = "0.1"
+walkdir = "2"
+pathdiff = "0.2"
