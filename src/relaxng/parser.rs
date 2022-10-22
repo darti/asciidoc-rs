@@ -1,11 +1,10 @@
-use nom::bytes::complete::take_until;
-use nom::character::complete::{multispace0, multispace1};
+use nom::bytes::complete::{escaped, take_until};
+use nom::character::complete::{multispace0, multispace1, one_of};
 use nom::error::Error as NomError;
-use nom::sequence::tuple;
 use nom::{
     bytes::complete::tag,
     bytes::complete::tag_no_case,
-    character::complete::{alphanumeric0, alphanumeric1, char},
+    character::complete::{alphanumeric1, char},
     combinator::map_res,
     sequence::{delimited, separated_pair},
     IResult,
@@ -14,20 +13,37 @@ use nom::{
 use nom_locate::LocatedSpan;
 use url::Url;
 
-use super::{Namespace, NamespaceBuilder, Schema, SchemaBuilder};
+use super::Namespace;
 
 type Span<'a> = LocatedSpan<&'a str>;
+
+/// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
+/// trailing whitespace, returning the output of `inner`.
+fn ws<'a, F, O, E>(inner: F) -> impl FnMut(Span<'a>) -> IResult<Span<'a>, O, E>
+where
+    F: Fn(Span<'a>) -> IResult<Span<'a>, O, E>,
+    E: nom::error::ParseError<Span<'a>>,
+{
+    delimited(multispace0, inner, multispace0)
+}
+
+fn quoted<'a, E>() -> impl FnMut(Span<'a>) -> IResult<Span<'a>, Span<'a>, E>
+where
+    E: nom::error::ParseError<Span<'a>>,
+{
+    delimited(
+        char('"'),
+        escaped(take_until("\""), '\\', one_of(r#""n\"#)),
+        char('"'),
+    )
+}
 
 fn parse_namespace(input: Span) -> IResult<Span, Namespace> {
     let (input, _) = tag_no_case("namespace")(input)?;
     let (input, _) = multispace1(input)?;
 
     map_res(
-        separated_pair(
-            alphanumeric1,
-            tuple((multispace0, tag("="), multispace0)),
-            delimited(char('"'), take_until("\""), char('"')),
-        ),
+        separated_pair(alphanumeric1, ws(tag("=")), quoted()),
         |(k, v): (Span, Span)| {
             Ok::<Namespace, NomError<Span>>(Namespace {
                 name: k.to_string(),
@@ -45,6 +61,7 @@ pub fn parse(s: &str) {
 
 #[cfg(test)]
 mod tests {
+    use super::super::NamespaceBuilder;
     use super::*;
     use indoc::indoc;
     use url::Url;
@@ -63,6 +80,6 @@ mod tests {
             .build()
             .unwrap();
 
-        // assert_eq!();
+        assert_eq!(o, r);
     }
 }
