@@ -3,6 +3,7 @@ mod tests;
 
 use nom::branch::alt;
 use nom::bytes::complete::{escaped, take, take_until};
+use nom::character::complete::line_ending;
 use nom::character::complete::{multispace0, multispace1, one_of};
 use nom::combinator::{opt, value};
 use nom::multi::{many0, many_m_n};
@@ -52,11 +53,11 @@ where
     terminated(ws(inner), opt(comment))
 }
 
-fn skip_comments_line<'a, F, O>(inner: F) -> impl FnMut(Span<'a>) -> IResult<Span<'a>, O>
+fn skip_comment_lines<'a, F, O>(inner: F) -> impl FnMut(Span<'a>) -> IResult<Span<'a>, O>
 where
     F: Fn(Span<'a>) -> IResult<Span<'a>, O>,
 {
-    preceded(many0(comment), inner)
+    preceded(many0(comment), ws(inner))
 }
 
 fn parse_namespace(input: Span) -> IResult<Span, (bool, Namespace)> {
@@ -74,7 +75,7 @@ fn parse_namespace(input: Span) -> IResult<Span, (bool, Namespace)> {
 }
 
 fn parse_namespaces(input: Span) -> IResult<Span, Vec<(bool, Namespace)>> {
-    many0(skip_comments_eol(parse_namespace))(input)
+    many0(skip_comment_lines(parse_namespace))(input)
 }
 
 pub fn parse(s: &str) {
