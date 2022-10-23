@@ -26,6 +26,7 @@ dependencies = [
  "pretty_env_logger",
  "serde",
  "serde-xml-rs",
+ "thiserror",
  "url",
  "walkdir",
  "xmlns",

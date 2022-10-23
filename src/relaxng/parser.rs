@@ -1,7 +1,7 @@
 use nom::bytes::complete::{escaped, take_until};
 use nom::character::complete::{multispace0, multispace1, newline, one_of};
 use nom::error::Error as NomError;
-use nom::multi::{many0, separated_list0};
+use nom::multi::{many0, many_m_n, separated_list0};
 use nom::{
     bytes::complete::tag,
     bytes::complete::tag_no_case,
@@ -14,6 +14,7 @@ use nom::{
 use nom_locate::LocatedSpan;
 use url::Url;
 
+use super::error::RelaxNgError;
 use super::Namespace;
 
 type Span<'a> = LocatedSpan<&'a str>;
@@ -36,21 +37,20 @@ fn quoted(input: Span) -> IResult<Span, Span> {
     )(input)
 }
 
-fn parse_namespace(input: Span) -> IResult<Span, Namespace> {
+fn parse_namespace(input: Span) -> IResult<Span, (bool, Namespace)> {
+    let (input, is_default) = map_res(many_m_n(0, 1, tag("default")), |d| {
+        Ok::<bool, RelaxNgError>(d.len() > 0)
+    })(input)?;
     let (input, _) = tag_no_case("namespace")(input)?;
     let (input, _) = multispace1(input)?;
 
     map_res(
         separated_pair(alphanumeric1, ws(tag("=")), quoted),
-        |(k, v): (Span, Span)| {
-            Ok::<Namespace, NomError<Span>>(Namespace {
-                name: k.to_string(),
-                url: Url::parse(&v).unwrap(),
-            })
-        },
+        move |(k, v): (Span, Span)| Namespace::new(&k, &v).map(|n| (is_default, n)),
     )(input)
 }
-fn parse_namespaces(input: Span) -> IResult<Span, Vec<Namespace>> {
+
+fn parse_namespaces(input: Span) -> IResult<Span, Vec<(bool, Namespace)>> {
     separated_list0(newline, parse_namespace)(input)
 }
 
@@ -134,7 +134,7 @@ mod tests {
             namespace html = \"http://www.w3.org/1999/xhtml\"
         "});
 
-        let (_, o) = parse_namespace(i).unwrap();
+        let (_, (d, o)) = parse_namespace(i).unwrap();
 
         let r = NamespaceBuilder::default()
             .name("html".into())
@@ -155,16 +155,52 @@ mod tests {
         let (_, o) = parse_namespaces(i).unwrap();
 
         let r = vec![
-            NamespaceBuilder::default()
-                .name("html".into())
-                .url(Url::parse("http://www.w3.org/1999/xhtml").unwrap())
-                .build()
-                .unwrap(),
-            NamespaceBuilder::default()
-                .name("rng".into())
-                .url(Url::parse("http://relaxng.org/ns/structure/1.0").unwrap())
-                .build()
-                .unwrap(),
+            (
+                false,
+                NamespaceBuilder::default()
+                    .name("html".into())
+                    .url(Url::parse("http://www.w3.org/1999/xhtml").unwrap())
+                    .build()
+                    .unwrap(),
+            ),
+            (
+                false,
+                NamespaceBuilder::default()
+                    .name("rng".into())
+                    .url(Url::parse("http://relaxng.org/ns/structure/1.0").unwrap())
+                    .build()
+                    .unwrap(),
+            ),
+        ];
+
+        assert_eq!(o, r);
+    }
+
+    fn test_parse_namespace_dafault() {
+        let i = Span::new(indoc! {"
+            default namespace html = \"http://www.w3.org/1999/xhtml\"
+            namespace rng = \"http://relaxng.org/ns/structure/1.0\"
+        "});
+
+        let (_, o) = parse_namespaces(i).unwrap();
+
+        let r = vec![
+            (
+                true,
+                NamespaceBuilder::default()
+                    .name("html".into())
+                    .url(Url::parse("http://www.w3.org/1999/xhtml").unwrap())
+                    .build()
+                    .unwrap(),
+            ),
+            (
+                false,
+                NamespaceBuilder::default()
+                    .name("rng".into())
+                    .url(Url::parse("http://relaxng.org/ns/structure/1.0").unwrap())
+                    .build()
+                    .unwrap(),
+            ),
         ];
 
         assert_eq!(o, r);
