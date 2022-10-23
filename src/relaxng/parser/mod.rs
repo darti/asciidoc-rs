@@ -1,12 +1,12 @@
 #[cfg(test)]
 mod tests;
 
-use nom::bytes::complete::{escaped, is_not, take_until};
-use nom::character::complete::{line_ending, multispace0, multispace1, newline, one_of};
-use nom::combinator::value;
-use nom::error::Error as NomError;
-use nom::multi::{many0, many_m_n, many_till, separated_list0};
-use nom::sequence::pair;
+use nom::branch::alt;
+use nom::bytes::complete::{escaped, take, take_until};
+use nom::character::complete::{multispace0, multispace1, one_of};
+use nom::combinator::{opt, value};
+use nom::multi::{many0, many_m_n};
+use nom::sequence::{pair, preceded, terminated, tuple};
 use nom::{
     bytes::complete::tag,
     bytes::complete::tag_no_case,
@@ -17,7 +17,6 @@ use nom::{
 };
 
 use nom_locate::LocatedSpan;
-use url::Url;
 
 use super::error::RelaxNgError;
 use super::Namespace;
@@ -42,20 +41,29 @@ fn quoted(input: Span) -> IResult<Span, Span> {
     )(input)
 }
 
-fn skip_comments<'a, F, O>(inner: F) -> impl FnMut(Span<'a>) -> IResult<Span<'a>, O>
+fn comment(input: Span) -> IResult<Span, ()> {
+    value((), tuple((ws(tag("#")), take_until("\n"), take(1usize))))(input)
+}
+
+fn skip_comments_eol<'a, F, O>(inner: F) -> impl FnMut(Span<'a>) -> IResult<Span<'a>, O>
 where
     F: Fn(Span<'a>) -> IResult<Span<'a>, O>,
 {
-    map_res(
-        many_till(value((), pair(char('#'), is_not("\n"))), inner),
-        |(_, r)| Ok::<O, NomError<Span<'a>>>(r),
-    )
+    terminated(ws(inner), opt(comment))
+}
+
+fn skip_comments_line<'a, F, O>(inner: F) -> impl FnMut(Span<'a>) -> IResult<Span<'a>, O>
+where
+    F: Fn(Span<'a>) -> IResult<Span<'a>, O>,
+{
+    preceded(many0(comment), inner)
 }
 
 fn parse_namespace(input: Span) -> IResult<Span, (bool, Namespace)> {
     let (input, is_default) = map_res(many_m_n(0, 1, tag("default")), |d| {
         Ok::<bool, RelaxNgError>(d.len() > 0)
     })(input)?;
+    let (input, _) = multispace0(input)?;
     let (input, _) = tag_no_case("namespace")(input)?;
     let (input, _) = multispace1(input)?;
 
@@ -66,7 +74,7 @@ fn parse_namespace(input: Span) -> IResult<Span, (bool, Namespace)> {
 }
 
 fn parse_namespaces(input: Span) -> IResult<Span, Vec<(bool, Namespace)>> {
-    separated_list0(newline, parse_namespace)(input)
+    many0(skip_comments_eol(parse_namespace))(input)
 }
 
 pub fn parse(s: &str) {
