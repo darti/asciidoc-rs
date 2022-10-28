@@ -1,4 +1,3 @@
-use super::super::NamespaceBuilder;
 use super::helpers::{comment, skip_comments_eol};
 use super::*;
 use indoc::indoc;
@@ -73,11 +72,7 @@ fn test_parse_namespace() {
 
     let (_, (d, o)) = parse_namespace(i).unwrap();
 
-    let r = NamespaceBuilder::default()
-        .name("html".into())
-        .url(Url::parse("http://www.w3.org/1999/xhtml").unwrap())
-        .build()
-        .unwrap();
+    let r = Namespace::new("html", "http://www.w3.org/1999/xhtml").unwrap();
 
     assert_eq!(o, r);
 }
@@ -94,19 +89,11 @@ fn test_parse_namespaces() {
     let r = vec![
         (
             false,
-            NamespaceBuilder::default()
-                .name("html".into())
-                .url(Url::parse("http://www.w3.org/1999/xhtml").unwrap())
-                .build()
-                .unwrap(),
+            Namespace::new("html", "http://www.w3.org/1999/xhtml").unwrap(),
         ),
         (
             false,
-            NamespaceBuilder::default()
-                .name("rng".into())
-                .url(Url::parse("http://relaxng.org/ns/structure/1.0").unwrap())
-                .build()
-                .unwrap(),
+            Namespace::new("rng", "http://relaxng.org/ns/structure/1.0").unwrap(),
         ),
     ];
 
@@ -125,19 +112,11 @@ fn test_parse_namespaces_comments() {
     let r = vec![
         (
             false,
-            NamespaceBuilder::default()
-                .name("html".into())
-                .url(Url::parse("http://www.w3.org/1999/xhtml").unwrap())
-                .build()
-                .unwrap(),
+            Namespace::new("html", "http://www.w3.org/1999/xhtml").unwrap(),
         ),
         (
             false,
-            NamespaceBuilder::default()
-                .name("rng".into())
-                .url(Url::parse("http://relaxng.org/ns/structure/1.0").unwrap())
-                .build()
-                .unwrap(),
+            Namespace::new("rng", "http://relaxng.org/ns/structure/1.0").unwrap(),
         ),
     ];
 
@@ -156,19 +135,11 @@ fn test_parse_namespace_default() {
     let r = vec![
         (
             true,
-            NamespaceBuilder::default()
-                .name("html".into())
-                .url(Url::parse("http://www.w3.org/1999/xhtml").unwrap())
-                .build()
-                .unwrap(),
+            Namespace::new("html", "http://www.w3.org/1999/xhtml").unwrap(),
         ),
         (
             false,
-            NamespaceBuilder::default()
-                .name("rng".into())
-                .url(Url::parse("http://relaxng.org/ns/structure/1.0").unwrap())
-                .build()
-                .unwrap(),
+            Namespace::new("rng", "http://relaxng.org/ns/structure/1.0").unwrap(),
         ),
     ];
 

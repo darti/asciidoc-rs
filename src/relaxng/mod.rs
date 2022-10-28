@@ -20,8 +20,8 @@ pub struct Schema {
     default_namespace: Option<String>,
 }
 
-#[derive(Debug, PartialEq, Clone, Builder)]
-#[builder(build_fn(error = "RelaxNgError"))]
+#[derive(Debug, PartialEq, Clone)]
+
 pub struct Namespace {
     pub name: String,
     pub url: Url,
