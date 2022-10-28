@@ -1,4 +1,5 @@
 use super::super::NamespaceBuilder;
+use super::helpers::{comment, skip_comments_eol};
 use super::*;
 use indoc::indoc;
 use url::Url;

@@ -17,7 +17,7 @@ use nom_locate::LocatedSpan;
 use self::helpers::{quoted, skip_comment_lines, ws};
 
 use super::error::{RelaxNgError, RelaxNgResult};
-use super::Namespace;
+use super::{Namespace, Schema, SchemaBuilder};
 
 pub type Span<'a> = LocatedSpan<&'a str>;
 
@@ -39,12 +39,20 @@ fn parse_namespaces(input: Span) -> IResult<Span, Vec<(bool, Namespace)>> {
     many0(skip_comment_lines(parse_namespace))(input)
 }
 
-pub fn parse(s: &str) -> RelaxNgResult<()> {
+pub fn parse(s: &str) -> RelaxNgResult<Schema> {
     let input = Span::new(s);
 
-    // SchemaBuilder::default().build();
+    let mut schema = SchemaBuilder::default();
 
-    let (input, ns) = parse_namespaces(input);
+    let (input, ns) = parse_namespaces(input).map_err(|e| e.map_input(|i| i.to_string()))?;
 
-    Ok(())
+    for (d, n) in ns {
+        if d {
+            schema.default_namespace(n.name.to_owned());
+        }
+
+        schema.namespace((n.name.to_owned(), n));
+    }
+
+    schema.build()
 }

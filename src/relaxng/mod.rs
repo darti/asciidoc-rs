@@ -1,6 +1,8 @@
 pub mod error;
 mod parser;
 
+pub use parser::parse;
+
 use std::collections::HashMap;
 
 use derive_builder::Builder;
@@ -8,29 +10,18 @@ use url::Url;
 
 use self::error::{RelaxNgError, RelaxNgResult};
 
-#[derive(Debug, PartialEq, Eq, Clone, Builder, Default)]
+#[derive(Debug, PartialEq, Clone, Builder, Default)]
+#[builder(build_fn(error = "RelaxNgError"), default)]
 pub struct Schema {
-    pub namespaces: Namespaces,
+    #[builder(setter(each(name = "namespace")))]
+    namespaces: HashMap<String, Namespace>,
+
+    #[builder(setter(strip_option, into))]
+    default_namespace: Option<String>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Builder, Default)]
-pub struct Namespaces {
-    pub namespaces: HashMap<String, Namespace>,
-    pub default_namespace: Option<String>,
-}
-
-impl Namespaces {
-    pub fn insert(&mut self, namespace: &Namespace, is_default: bool) {
-        self.namespaces
-            .insert(namespace.name.to_string(), namespace.to_owned());
-
-        if is_default {
-            self.default_namespace = Some(namespace.name.to_string());
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, Clone, Builder)]
+#[derive(Debug, PartialEq, Clone, Builder)]
+#[builder(build_fn(error = "RelaxNgError"))]
 pub struct Namespace {
     pub name: String,
     pub url: Url,
