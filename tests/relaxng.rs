@@ -1,8 +1,9 @@
-use asciidoc_rs::relaxng::parse;
+use asciidoc_rs::relaxng::*;
 use ctor::ctor;
 
 use log::info;
 use pretty_env_logger::env_logger::{Builder, Env};
+use serde_xml_rs::{from_str, to_string};
 
 #[ctor]
 fn init_logger() {
@@ -13,9 +14,9 @@ fn init_logger() {
 
 #[test]
 fn test_docbook() {
-    let s = include_str!("docbook.rnc");
+    let src = include_str!("../schemas/docbook.rng.xml");
 
-    let r = parse(s);
+    let grammar: Pattern = from_str(src).unwrap();
 
-    info!("{:?}", r);
+    info!("{:?}", grammar);
 }

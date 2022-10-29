@@ -5,9 +5,6 @@ pub enum RelaxNgError {
     #[error("invalid url")]
     InvalidUrl(#[from] url::ParseError),
 
-    #[error(transparent)]
-    ParseError(#[from] nom::Err<nom::error::Error<String>>),
-
     #[error("builder failure, missing field: {0}")]
     BuilderMissingField(&'static str),
 }

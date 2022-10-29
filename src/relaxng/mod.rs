@@ -1,37 +1,63 @@
-pub mod error;
-mod parser;
-
-pub use parser::parse;
-
-use std::collections::HashMap;
-
 use derive_builder::Builder;
-use url::Url;
 
-use self::error::{RelaxNgError, RelaxNgResult};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Clone, Builder, Default)]
-#[builder(build_fn(error = "RelaxNgError"), default)]
-pub struct Schema {
-    #[builder(setter(each(name = "namespace")))]
-    namespaces: HashMap<String, Namespace>,
+pub mod error;
 
-    #[builder(setter(strip_option, into))]
-    default_namespace: Option<String>,
+#[cfg(test)]
+mod tests;
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Builder, Clone, Default)]
+#[serde(rename = "grammar")]
+pub struct Grammar {
+    #[serde(rename = "$value")]
+    #[builder(default, setter(strip_option, each(name = "content")))]
+    pub grammar_content: Option<Vec<GrammarContent>>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
-
-pub struct Namespace {
-    pub name: String,
-    pub url: Url,
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[serde(rename_all = "camelCase")]
+pub enum GrammarContent {
+    Start(Start),
+    Define(Define),
+    Include(Include),
 }
 
-impl Namespace {
-    pub fn new(name: &str, url: &str) -> RelaxNgResult<Self> {
-        Ok(Self {
-            name: name.to_string(),
-            url: Url::parse(url)?,
-        })
-    }
+#[derive(Debug, Serialize, Deserialize, PartialEq, Builder, Clone, Default)]
+pub struct Start {}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Builder, Clone, Default)]
+pub struct Define {}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Builder, Clone, Default)]
+pub struct Div {}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Builder, Clone, Default)]
+pub struct Include {}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Builder, Clone, Default)]
+pub struct Choice {}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[serde(rename_all = "camelCase")]
+pub enum Pattern {
+    Element,
+    Attribute,
+    Group,
+    Interleave,
+    Choice(Choice),
+    Optional,
+    ZeroOrMore,
+    OneOrMore,
+    List,
+    Mixed,
+    Ref,
+    ParentRef,
+    Empty,
+    Text,
+    Value,
+    Data,
+    NotAllowed,
+    ExternalRef,
+    Grammar(Grammar),
 }
