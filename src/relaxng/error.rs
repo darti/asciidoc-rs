@@ -10,6 +10,12 @@ pub enum RelaxNgError {
 
     #[error("element with no name")]
     ElementWithNoName,
+
+    #[error("unsupported root node, grammar only")]
+    Unsupported,
+
+    #[error("missing <start /> in <grammar /> ")]
+    MissingStart,
 }
 
 pub type RelaxNgResult<T> = Result<T, RelaxNgError>;

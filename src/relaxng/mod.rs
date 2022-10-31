@@ -13,7 +13,11 @@ mod tests;
 pub fn generate(doc: &Document) -> RelaxNgResult<()> {
     let root = doc.root_element();
 
-    parse_pattern(&root)
+    if root.tag_name().name() != "grammar" {
+        return Err(RelaxNgError::Unsupported);
+    }
+
+    parse_grammar(&root)
 }
 
 fn parse_pattern(pat: &Node) -> RelaxNgResult<()> {
@@ -39,6 +43,11 @@ fn parse_grammar(grammar: &Node) -> RelaxNgResult<()> {
         info!("definition {}", name);
         parse_define(&def)?;
     }
+
+    let start = grammar
+        .children()
+        .find(|n| n.tag_name().name() == "start")
+        .ok_or(RelaxNgError::MissingStart)?;
 
     Ok(())
 }

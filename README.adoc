@@ -1,5 +1,39 @@
 = Asciidoc-rs
 
+== Relax NG
+
+https://relaxng.org/spec-20011203.html#IDAODZR
+
+=== Simple grammar
+
+[source]
+----
+
+grammar	  ::=  	<grammar> <start> top </start> define* </grammar>
+define	  ::=  	<define name="NCName"> <element> nameClass top </element> </define>
+top	  ::=  	<notAllowed/>
+| pattern
+pattern	  ::=  	<empty/>
+| nonEmptyPattern
+nonEmptyPattern	  ::=  	<text/>
+| <data type="NCName" datatypeLibrary="anyURI"> param* [exceptPattern] </data>
+| <value datatypeLibrary="anyURI" type="NCName" ns="string"> string </value>
+| <list> pattern </list>
+| <attribute> nameClass pattern </attribute>
+| <ref name="NCName"/>
+| <oneOrMore> nonEmptyPattern </oneOrMore>
+| <choice> pattern nonEmptyPattern </choice>
+| <group> nonEmptyPattern nonEmptyPattern </group>
+| <interleave> nonEmptyPattern nonEmptyPattern </interleave>
+param	  ::=  	<param name="NCName"> string </param>
+exceptPattern	  ::=  	<except> pattern </except>
+nameClass	  ::=  	<anyName> [exceptNameClass] </anyName>
+| <nsName ns="string"> [exceptNameClass] </nsName>
+| <name ns="string"> NCName </name>
+| <choice> nameClass nameClass </choice>
+exceptNameClass	  ::=  	<except> nameClass </except>
+----
+
 == Links
 
 - https://tdg.docbook.org/tdg/5.2/
