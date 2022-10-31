@@ -7,6 +7,9 @@ pub enum RelaxNgError {
 
     #[error("builder failure, missing field: {0}")]
     BuilderMissingField(&'static str),
+
+    #[error("element with no name")]
+    ElementWithNoName,
 }
 
 pub type RelaxNgResult<T> = Result<T, RelaxNgError>;

@@ -1,65 +1,70 @@
-use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
+use codegen::Scope;
+use convert_case::{Case, Casing};
+use log::info;
+use roxmltree::{Document, Node};
+
+use self::error::{RelaxNgError, RelaxNgResult};
 
 pub mod error;
 
 #[cfg(test)]
 mod tests;
 
-#[serde_as]
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
-pub struct Grammar {
-    #[serde(rename = "$value")]
-    #[serde(default)]
-    pub grammar_content: Vec<GrammarContent>,
+pub fn generate(doc: &Document) -> RelaxNgResult<()> {
+    let root = doc.root_element();
+
+    parse_pattern(&root)
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "camelCase")]
-#[serde(untagged)]
-pub enum GrammarContent {
-    Start(Start),
-    // Define(Define),
-    // Include(Include),
+fn parse_pattern(pat: &Node) -> RelaxNgResult<()> {
+    let tag = pat.tag_name().name();
+    info!("parse pattern, tag = {}", tag);
+
+    match tag {
+        "grammar" => parse_grammar(&pat),
+        "element" => parse_element(&pat),
+        t => Ok(()),
+    }
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct Start {
-    pattern: Pattern,
+fn parse_grammar(grammar: &Node) -> RelaxNgResult<()> {
+    for def in grammar
+        .children()
+        .filter(|n| n.is_element() && n.tag_name().name() == "define")
+    {
+        let name = def
+            .attribute("name")
+            .ok_or(RelaxNgError::ElementWithNoName)?;
+
+        info!("definition {}", name);
+        parse_define(&def)?;
+    }
+
+    Ok(())
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct Define {}
+fn parse_define(define: &Node) -> RelaxNgResult<()> {
+    for def in define.children().filter(|n| n.is_element()) {
+        parse_pattern(&def)?;
+    }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
-pub struct Div {}
+    Ok(())
+}
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
-pub struct Include {}
+fn parse_element(elem: &Node) -> RelaxNgResult<()> {
+    let name = elem
+        .children()
+        .find(|n| n.tag_name().name() == "name")
+        .and_then(|n| n.text())
+        .ok_or(RelaxNgError::ElementWithNoName)?;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
-pub struct Choice {}
+    info!("type definition : {}", name);
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-#[serde(rename_all = "camelCase")]
-pub enum Pattern {
-    Element,
-    Attribute,
-    Group,
-    Interleave,
-    Choice(Choice),
-    Optional,
-    ZeroOrMore,
-    OneOrMore,
-    List,
-    Mixed,
-    Ref,
-    ParentRef,
-    Empty,
-    Text,
-    Value,
-    Data,
-    NotAllowed,
-    ExternalRef,
-    Grammar(Grammar),
+    let mut scope = Scope::new();
+
+    let elt = scope.new_struct(&name.to_case(Case::UpperCamel));
+
+    info!("generated\n {}", scope.to_string());
+
+    Ok(())
 }

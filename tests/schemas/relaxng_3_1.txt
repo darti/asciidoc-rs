@@ -1,0 +1,183 @@
+Document [
+    Element {
+        tag_name: {http://relaxng.org/ns/structure/1.0}grammar
+        namespaces: [
+            Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+        ]
+        children: [
+            Text("\n    ")
+            Element {
+                tag_name: {http://relaxng.org/ns/structure/1.0}start
+                namespaces: [
+                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                ]
+                children: [
+                    Text("\n        ")
+                    Element {
+                        tag_name: {http://relaxng.org/ns/structure/1.0}ref
+                        attributes: [
+                            Attribute { name: name, value: "foo.element" }
+                        ]
+                        namespaces: [
+                            Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                        ]
+                    }
+                    Text("\n    ")
+                ]
+            }
+            Text("\n\n    ")
+            Element {
+                tag_name: {http://relaxng.org/ns/structure/1.0}define
+                attributes: [
+                    Attribute { name: name, value: "foo.element" }
+                ]
+                namespaces: [
+                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                ]
+                children: [
+                    Text("\n        ")
+                    Element {
+                        tag_name: {http://relaxng.org/ns/structure/1.0}element
+                        namespaces: [
+                            Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                        ]
+                        children: [
+                            Text("\n            ")
+                            Element {
+                                tag_name: {http://relaxng.org/ns/structure/1.0}name
+                                attributes: [
+                                    Attribute { name: ns, value: "" }
+                                ]
+                                namespaces: [
+                                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                                ]
+                                children: [
+                                    Text("foo")
+                                ]
+                            }
+                            Text("\n            ")
+                            Element {
+                                tag_name: {http://relaxng.org/ns/structure/1.0}group
+                                namespaces: [
+                                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                                ]
+                                children: [
+                                    Text("\n                ")
+                                    Element {
+                                        tag_name: {http://relaxng.org/ns/structure/1.0}ref
+                                        attributes: [
+                                            Attribute { name: name, value: "bar1.element" }
+                                        ]
+                                        namespaces: [
+                                            Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                                        ]
+                                    }
+                                    Text("\n                ")
+                                    Element {
+                                        tag_name: {http://relaxng.org/ns/structure/1.0}ref
+                                        attributes: [
+                                            Attribute { name: name, value: "bar2.element" }
+                                        ]
+                                        namespaces: [
+                                            Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                                        ]
+                                    }
+                                    Text("\n            ")
+                                ]
+                            }
+                            Text("\n        ")
+                        ]
+                    }
+                    Text("\n    ")
+                ]
+            }
+            Text("\n\n    ")
+            Element {
+                tag_name: {http://relaxng.org/ns/structure/1.0}define
+                attributes: [
+                    Attribute { name: name, value: "bar1.element" }
+                ]
+                namespaces: [
+                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                ]
+                children: [
+                    Text("\n        ")
+                    Element {
+                        tag_name: {http://relaxng.org/ns/structure/1.0}element
+                        namespaces: [
+                            Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                        ]
+                        children: [
+                            Text("\n            ")
+                            Element {
+                                tag_name: {http://relaxng.org/ns/structure/1.0}name
+                                attributes: [
+                                    Attribute { name: ns, value: "http://www.example.com/n1" }
+                                ]
+                                namespaces: [
+                                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                                ]
+                                children: [
+                                    Text("bar1")
+                                ]
+                            }
+                            Text("\n            ")
+                            Element {
+                                tag_name: {http://relaxng.org/ns/structure/1.0}empty
+                                namespaces: [
+                                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                                ]
+                            }
+                            Text("\n        ")
+                        ]
+                    }
+                    Text("\n    ")
+                ]
+            }
+            Text("\n\n    ")
+            Element {
+                tag_name: {http://relaxng.org/ns/structure/1.0}define
+                attributes: [
+                    Attribute { name: name, value: "bar2.element" }
+                ]
+                namespaces: [
+                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                ]
+                children: [
+                    Text("\n        ")
+                    Element {
+                        tag_name: {http://relaxng.org/ns/structure/1.0}element
+                        namespaces: [
+                            Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                        ]
+                        children: [
+                            Text("\n            ")
+                            Element {
+                                tag_name: {http://relaxng.org/ns/structure/1.0}name
+                                attributes: [
+                                    Attribute { name: ns, value: "http://www.example.com/n2" }
+                                ]
+                                namespaces: [
+                                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                                ]
+                                children: [
+                                    Text("bar2")
+                                ]
+                            }
+                            Text("\n            ")
+                            Element {
+                                tag_name: {http://relaxng.org/ns/structure/1.0}empty
+                                namespaces: [
+                                    Namespace { name: None, uri: "http://relaxng.org/ns/structure/1.0" }
+                                ]
+                            }
+                            Text("\n        ")
+                        ]
+                    }
+                    Text("\n    ")
+                ]
+            }
+            Text("\n")
+        ]
+    }
+]

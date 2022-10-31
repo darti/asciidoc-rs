@@ -1,9 +1,9 @@
+use anyhow::Ok;
 use asciidoc_rs::relaxng::*;
 use ctor::ctor;
 
 use log::info;
 use pretty_env_logger::env_logger::{Builder, Env};
-use serde_roxmltree::from_doc;
 
 #[ctor]
 fn init_logger() {
@@ -24,12 +24,11 @@ fn test_docbook() {
 }
 
 #[test]
-fn test_spec_3_1() {
+fn test_spec_3_1() -> anyhow::Result<()> {
     let src = include_str!("./schemas/relaxng_3_1.rng.xml");
 
-    let doc = roxmltree::Document::parse(src).unwrap();
+    let doc = roxmltree::Document::parse(src)?;
+    generate(&doc)?;
 
-    // from_doc(&doc);
-
-    // info!("{:?}", doc);
+    Ok(())
 }

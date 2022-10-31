@@ -17,9 +17,9 @@ url = { version = "2", features = ["serde"] }
 derive_builder = "0.11"
 thiserror = "1"
 roxmltree = "0.15"
-serde = { version = "1.0.147", features = ["derive"] }
-serde-roxmltree = "0.3.3"
-serde_with = "2.0.1"
+serde_with = "2"
+codegen = "0.2"
+convert_case = "0.6"
 
 
 [dev-dependencies]

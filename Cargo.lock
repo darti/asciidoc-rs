@@ -31,6 +31,8 @@ name = "asciidoc-rs"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "codegen",
+ "convert_case",
  "ctor",
  "derive_builder",
  "indoc",
@@ -39,8 +41,6 @@ dependencies = [
  "pathdiff",
  "pretty_env_logger",
  "roxmltree",
- "serde",
- "serde-roxmltree",
  "serde_with",
  "thiserror",
  "url",
@@ -103,6 +103,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "codegen"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ff61280aed771c3070e7dcc9e050c66f1eb1e3b96431ba66f9f74641d02fc41d"
+dependencies = [
+ "indexmap",
+]
+
+[[package]]
 name = "codespan-reporting"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -110,6 +119,15 @@ checksum = "3538270d33cc669650c4b093848450d380def10c331d38c768e34cac80576e6e"
 dependencies = [
  "termcolor",
  "unicode-width",
+]
+
+[[package]]
+name = "convert_case"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
+dependencies = [
+ "unicode-segmentation",
 ]
 
 [[package]]
@@ -541,16 +559,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde-roxmltree"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b1b22d1ed8a7d97a31ae210b800d969845cea06ceb04a4646e73b2f02795f95"
-dependencies = [
- "roxmltree",
- "serde",
-]
-
-[[package]]
 name = "serde_derive"
 version = "1.0.147"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -710,6 +718,12 @@ checksum = "5c5713f0fc4b5db668a2ac63cdb7bb4469d8c9fed047b1d0292cc7b0ce2ba921"
 dependencies = [
  "tinyvec",
 ]
+
+[[package]]
+name = "unicode-segmentation"
+version = "1.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fdbf052a0783de01e944a6ce7a8cb939e295b1e7be835a1112c3b9a7f047a5a"
 
 [[package]]
 name = "unicode-width"
