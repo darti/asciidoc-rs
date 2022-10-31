@@ -3,7 +3,7 @@ use indoc::indoc;
 
 use log::info;
 use pretty_env_logger::env_logger::{Builder, Env};
-use serde_xml_rs::{from_str, to_string};
+use serde_roxmltree::from_doc;
 
 use super::*;
 
@@ -15,29 +15,60 @@ fn init_logger() {
 }
 
 #[test]
-fn test_empty_schema() {
-    let src = indoc! {r#"
-        <grammar xmlns="http://relaxng.org/ns/structure/1.0"></grammar>
-    "#};
+fn test_empty_schema() -> anyhow::Result<()> {
+    let src = indoc! {r#"<grammar xmlns="http://relaxng.org/ns/structure/1.0"></grammar>"#};
 
-    let grammar: Result<Grammar, _> = from_str(src);
-    let should_be = GrammarBuilder::default().build().unwrap();
+    let doc = roxmltree::Document::parse(src)?;
+    let schema: Grammar = from_doc(&doc)?;
 
-    assert_eq!(grammar.unwrap(), should_be);
+    let should_be = Grammar {
+        grammar_content: vec![],
+    };
+
+    assert_eq!(schema, should_be);
+
+    Ok(())
 }
 
 #[test]
-fn write_schema() {
-    let grammar = GrammarBuilder::default()
-        .content(GrammarContent::Start(
-            StartBuilder::default().build().unwrap(),
-        ))
-        .build()
-        .unwrap();
+fn test_start() -> anyhow::Result<()> {
+    let src = indoc! {r#"
 
-    let src = Pattern::Grammar(grammar);
+        <start></start>
 
-    let output = to_string(&src).unwrap();
+    "#};
 
-    info!("{}", output)
+    let doc = roxmltree::Document::parse(src)?;
+    let schema: GrammarContent = from_doc(&doc)?;
+
+    info!("{:?}", schema);
+
+    let should_be = Grammar {
+        grammar_content: vec![GrammarContent::Start(Start {
+            pattern: Pattern::Empty,
+        })],
+    };
+
+    // assert_eq!(schema, should_be);
+    Ok(())
 }
+
+// #[test]
+// fn test_grammar() {
+//     let src = indoc! {r#"
+//         <grammar xmlns="http://relaxng.org/ns/structure/1.0">
+//         <start></start>
+//         </grammar>
+//     "#};
+
+//     let doc = roxmltree::Document::parse(src).unwrap();
+//     let schema: Result<Grammar, _> = from_doc(&doc);
+
+//     info!("{:?}", doc);
+
+//     let should_be = Grammar {
+//         grammar_content: vec![GrammarContent::Start(Start {})],
+//     };
+
+//     assert_eq!(schema.unwrap(), should_be);
+// }

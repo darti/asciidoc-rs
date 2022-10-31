@@ -12,16 +12,19 @@ pretty_env_logger = "0.4"
 lazy_static = "1"
 log = "0.4"
 
-serde-xml-rs = "0.6.0"
+xmlns = "0.1"
+url = { version = "2", features = ["serde"] }
+derive_builder = "0.11"
+thiserror = "1"
+roxmltree = "0.15"
 serde = { version = "1.0.147", features = ["derive"] }
-xmlns = "0.1.1"
-url = { version = "2.3.1", features = ["serde"] }
-derive_builder = "0.11.2"
-thiserror = "1.0.37"
+serde-roxmltree = "0.3.3"
+serde_with = "2.0.1"
 
 
 [dev-dependencies]
 ctor = "0.1"
 walkdir = "2"
 pathdiff = "0.2"
-indoc = "1.0.7"
+indoc = "1"
+anyhow = "1"
