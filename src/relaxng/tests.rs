@@ -1,5 +1,4 @@
 use ctor::ctor;
-use indoc::indoc;
 
 use log::info;
 use pretty_env_logger::env_logger::{Builder, Env};
@@ -13,9 +12,20 @@ fn init_logger() {
         .init();
 }
 
+fn roundtrip(g: &Grammar) -> anyhow::Result<()> {
+    let xml = se::to_string(&g)?;
+    info!("xml: {}", xml);
+    let output: Grammar = de::from_str(&xml)?;
+    info!("struct: {:?}", output);
+
+    assert_eq!(*g, output);
+
+    Ok(())
+}
+
 #[test]
 fn test_enum() -> anyhow::Result<()> {
-    let src = Grammar {
+    let g = Grammar {
         start: Start {
             pattern: Pattern::Ref {
                 name: "toto".into(),
@@ -24,12 +34,5 @@ fn test_enum() -> anyhow::Result<()> {
         define: vec![],
     };
 
-    let xml = se::to_string(&src)?;
-    info!("xml: {}", xml);
-    let output: Grammar = de::from_str(&xml)?;
-    info!("xml: {:?}", output);
-
-    assert_eq!(src, output);
-
-    Ok(())
+    roundtrip(&g)
 }

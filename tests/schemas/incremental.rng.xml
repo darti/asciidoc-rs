@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" ns="">
+    <!--
+    Target namespace is intentionally set to "" so as not to interfere with
+    prefix/URI bindings
+  -->
+
+    <start>
+        <ref name="testSuite" />
+    </start>
+
+    <define name="testSuite">
+        <element name="testSuite">
+            <ref name="header" />
+            <zeroOrMore>
+                <choice>
+                    <ref name="testSuite" />
+                    <ref name="testCase" />
+                </choice>
+            </zeroOrMore>
+        </element>
+    </define>
+</grammar>

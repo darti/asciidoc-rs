@@ -36,6 +36,14 @@ pub enum Pattern {
         #[serde(rename = "$value")]
         pattern: [Box<Pattern>; 2],
     },
+    ZeroOrMore {
+        #[serde(rename = "$value")]
+        pattern: Vec<Pattern>,
+    },
+    Choice {
+        #[serde(rename = "$value")]
+        pattern: Vec<Pattern>,
+    },
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
