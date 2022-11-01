@@ -1,7 +1,8 @@
 use codegen::Scope;
 use convert_case::{Case, Casing};
 use log::info;
-use roxmltree::{Document, Node};
+use quick_xml::{de, se};
+use serde::{de::IntoDeserializer, Deserialize, Serialize};
 
 use self::error::{RelaxNgError, RelaxNgResult};
 
@@ -10,70 +11,26 @@ pub mod error;
 #[cfg(test)]
 mod tests;
 
-pub fn generate(doc: &Document) -> RelaxNgResult<()> {
-    let root = doc.root_element();
-
-    if root.tag_name().name() != "grammar" {
-        return Err(RelaxNgError::Unsupported);
-    }
-
-    parse_grammar(&root)
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename = "grammar")]
+pub struct Grammar {
+    start: Start,
 }
 
-fn parse_pattern(pat: &Node) -> RelaxNgResult<()> {
-    let tag = pat.tag_name().name();
-    info!("parse pattern, tag = {}", tag);
-
-    match tag {
-        "grammar" => parse_grammar(&pat),
-        "element" => parse_element(&pat),
-        t => Ok(()),
-    }
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct Start {
+    #[serde(rename = "$value")]
+    pattern: Pattern,
 }
 
-fn parse_grammar(grammar: &Node) -> RelaxNgResult<()> {
-    for def in grammar
-        .children()
-        .filter(|n| n.is_element() && n.tag_name().name() == "define")
-    {
-        let name = def
-            .attribute("name")
-            .ok_or(RelaxNgError::ElementWithNoName)?;
-
-        info!("definition {}", name);
-        parse_define(&def)?;
-    }
-
-    let start = grammar
-        .children()
-        .find(|n| n.tag_name().name() == "start")
-        .ok_or(RelaxNgError::MissingStart)?;
-
-    Ok(())
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Pattern {
+    Ref { name: String },
 }
 
-fn parse_define(define: &Node) -> RelaxNgResult<()> {
-    for def in define.children().filter(|n| n.is_element()) {
-        parse_pattern(&def)?;
-    }
+pub fn generate(s: &str) -> RelaxNgResult<Grammar> {
+    let grammar: Grammar = de::from_str(&s)?;
 
-    Ok(())
-}
-
-fn parse_element(elem: &Node) -> RelaxNgResult<()> {
-    let name = elem
-        .children()
-        .find(|n| n.tag_name().name() == "name")
-        .and_then(|n| n.text())
-        .ok_or(RelaxNgError::ElementWithNoName)?;
-
-    info!("type definition : {}", name);
-
-    let mut scope = Scope::new();
-
-    let elt = scope.new_struct(&name.to_case(Case::UpperCamel));
-
-    info!("generated\n {}", scope.to_string());
-
-    Ok(())
+    Ok(grammar)
 }

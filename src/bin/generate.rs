@@ -1,6 +1,7 @@
+use std::fs;
+
 use log::info;
 use pretty_env_logger::env_logger::{Builder, Env};
-use std::fs;
 
 use asciidoc_rs::relaxng::generate;
 
@@ -11,9 +12,10 @@ fn main() -> anyhow::Result<()> {
     info!("parsing {}", input);
 
     let src = fs::read_to_string(input)?;
-    let doc = roxmltree::Document::parse(&src)?;
 
-    generate(&doc)?;
+    let g = generate(&src)?;
+
+    info!("{:?}", g);
 
     Ok(())
 }

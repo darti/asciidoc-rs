@@ -1,3 +1,4 @@
+use quick_xml::DeError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -16,6 +17,9 @@ pub enum RelaxNgError {
 
     #[error("missing <start /> in <grammar /> ")]
     MissingStart,
+
+    #[error(transparent)]
+    DeserializerError(#[from] DeError),
 }
 
 pub type RelaxNgResult<T> = Result<T, RelaxNgError>;

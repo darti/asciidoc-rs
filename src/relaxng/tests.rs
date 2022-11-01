@@ -14,46 +14,21 @@ fn init_logger() {
 }
 
 #[test]
-fn test_empty_schema() -> anyhow::Result<()> {
-    let src = indoc! {r#"<grammar xmlns="http://relaxng.org/ns/structure/1.0"></grammar>"#};
+fn test_enum() -> anyhow::Result<()> {
+    let src = Grammar {
+        start: Start {
+            pattern: Pattern::Ref {
+                name: "toto".into(),
+            },
+        },
+    };
 
-    let doc = roxmltree::Document::parse(src)?;
+    let xml = se::to_string(&src)?;
+    info!("xml: {}", xml);
+    let output: Grammar = de::from_str(&xml)?;
+    info!("xml: {:?}", output);
 
-    // assert_eq!(schema, should_be);
+    assert_eq!(src, output);
 
     Ok(())
 }
-
-#[test]
-fn test_start() -> anyhow::Result<()> {
-    let src = indoc! {r#"
-
-        <start></start>
-
-    "#};
-
-    let doc = roxmltree::Document::parse(src)?;
-
-    // assert_eq!(schema, should_be);
-    Ok(())
-}
-
-// #[test]
-// fn test_grammar() {
-//     let src = indoc! {r#"
-//         <grammar xmlns="http://relaxng.org/ns/structure/1.0">
-//         <start></start>
-//         </grammar>
-//     "#};
-
-//     let doc = roxmltree::Document::parse(src).unwrap();
-//     let schema: Result<Grammar, _> = from_doc(&doc);
-
-//     info!("{:?}", doc);
-
-//     let should_be = Grammar {
-//         grammar_content: vec![GrammarContent::Start(Start {})],
-//     };
-
-//     assert_eq!(schema.unwrap(), should_be);
-// }
