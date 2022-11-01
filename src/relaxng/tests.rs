@@ -21,6 +21,7 @@ fn test_enum() -> anyhow::Result<()> {
                 name: "toto".into(),
             },
         },
+        define: vec![],
     };
 
     let xml = se::to_string(&src)?;
