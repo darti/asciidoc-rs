@@ -42,6 +42,9 @@ pub enum Pattern {
     Ref {
         name: String,
     },
+    ExternalRef {
+        href: String,
+    },
     Group {
         #[serde(rename = "$value", default)]
         pattern: [Box<Pattern>; 2],
@@ -60,6 +63,16 @@ pub enum Pattern {
         #[serde(rename = "$value", default)]
         pattern: Vec<Pattern>,
     },
+
+    Attribute {
+        #[serde(default)]
+        name: Option<String>,
+        #[serde(default)]
+        name_class: Option<NameClass>,
+
+        #[serde(rename = "$value", default)]
+        pattern: Box<Pattern>,
+    },
 }
 
 impl Default for Pattern {
@@ -74,6 +87,10 @@ pub fn empty() -> Pattern {
 
 pub fn reference(name: &str) -> Pattern {
     Pattern::Ref { name: name.into() }
+}
+
+pub fn external_reference(href: &str) -> Pattern {
+    Pattern::ExternalRef { href: href.into() }
 }
 
 pub fn group(pattern: [Box<Pattern>; 2]) -> Pattern {
@@ -95,6 +112,22 @@ pub fn element(name: &str, pattern: Vec<Pattern>) -> Pattern {
     }
 }
 
+pub fn attribute(name: &str, pattern: Pattern) -> Pattern {
+    Pattern::Attribute {
+        name: Some(name.into()),
+        name_class: None,
+        pattern: Box::new(pattern),
+    }
+}
+
+pub fn attribute_with_name_class(name_class: NameClass, pattern: Pattern) -> Pattern {
+    Pattern::Attribute {
+        name: None,
+        name_class: Some(name_class),
+        pattern: Box::new(pattern),
+    }
+}
+
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct Define {
     name: String,
@@ -112,19 +145,17 @@ impl Define {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-pub struct Element {
-    name: String,
-    #[serde(rename = "$value", default)]
-    pattern: Vec<Pattern>,
-}
-
-impl Element {
-    pub fn new(name: &str, pattern: Vec<Pattern>) -> Self {
-        Self {
-            name: name.into(),
-            pattern,
-        }
-    }
+#[serde(rename_all = "camelCase")]
+pub enum NameClass {
+    Name(String),
+    AnyName {
+        except: Option<Box<NameClass>>,
+    },
+    Choice {
+        #[serde(rename = "$value", default)]
+        names: Vec<NameClass>,
+    },
+    Except(Vec<NameClass>),
 }
 
 pub fn generate(s: &str) -> RelaxNgResult<Grammar> {

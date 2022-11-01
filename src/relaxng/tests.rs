@@ -1,9 +1,12 @@
+use std::fmt::Debug;
+
+use anyhow::Ok;
 use ctor::ctor;
 
 use log::info;
 use pretty_assertions::{assert_eq, assert_ne};
 use pretty_env_logger::env_logger::{Builder, Env};
-use quick_xml::{se::Serializer, Writer};
+use quick_xml::{de::from_str, se::Serializer, Writer};
 use serde::Serialize;
 
 use super::*;
@@ -15,7 +18,10 @@ fn init_logger() {
         .init();
 }
 
-fn roundtrip(g: &Grammar) -> anyhow::Result<()> {
+fn roundtrip<T>(g: &T) -> anyhow::Result<()>
+where
+    T: Serialize + Debug + PartialEq + for<'de> Deserialize<'de>,
+{
     let mut buffer = Vec::new();
     let writer = Writer::new_with_indent(&mut buffer, b' ', 2);
 
@@ -23,7 +29,7 @@ fn roundtrip(g: &Grammar) -> anyhow::Result<()> {
     g.serialize(&mut serializer).unwrap();
     let xml = String::from_utf8(buffer).unwrap();
 
-    let output: Grammar = de::from_str(&xml)?;
+    let output: T = from_str(&xml)?;
 
     assert_eq!(*g, output);
 
@@ -79,7 +85,59 @@ fn test_define_choice() -> anyhow::Result<()> {
         ))
         .build()?;
 
-    info!("grammar\n{}", quick_xml::se::to_string(&g)?);
+    // info!("grammar\n{}", quick_xml::se::to_string(&g)?);
 
     roundtrip(&g)
+}
+
+#[test]
+fn test_name_class_name() -> anyhow::Result<()> {
+    let src = NameClass::Name("toto".into());
+
+    info!("xml\n{}", quick_xml::se::to_string(&src)?);
+
+    roundtrip(&src)
+}
+
+#[test]
+fn test_name_class_any_name_empty() -> anyhow::Result<()> {
+    let src = NameClass::AnyName { except: None };
+
+    roundtrip(&src)
+}
+
+#[test]
+fn test_name_class_any_name_some() -> anyhow::Result<()> {
+    let src = NameClass::AnyName {
+        except: Some(Box::new(NameClass::Except(vec![NameClass::Name(
+            "toto".into(),
+        )]))),
+    };
+
+    roundtrip(&src)
+}
+
+#[test]
+fn test_attribute_anyname_empty() -> anyhow::Result<()> {
+    let src = attribute_with_name_class(NameClass::AnyName { except: None }, empty());
+
+    info!("xml\n{}", quick_xml::se::to_string(&src)?);
+
+    roundtrip(&src)
+}
+
+#[test]
+fn test_attribute_anyname_value() -> anyhow::Result<()> {
+    let src = attribute_with_name_class(
+        NameClass::AnyName {
+            except: Some(Box::new(NameClass::Except(vec![NameClass::Name(
+                "toto".into(),
+            )]))),
+        },
+        empty(),
+    );
+
+    info!("xml\n{}", quick_xml::se::to_string(&src)?);
+
+    roundtrip(&src)
 }

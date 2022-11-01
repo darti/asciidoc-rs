@@ -5,19 +5,17 @@ use log::info;
 use quick_xml::de;
 
 #[test]
-#[ignore]
+
 fn test_3_1() -> anyhow::Result<()> {
     let xml = include_str!("./schemas/relaxng_3_1.rng.xml");
 
     let output: Grammar = de::from_str(&xml)?;
 
-    info!("Parsed\n{:?}", output);
-
     Ok(())
 }
 
 #[test]
-#[ignore]
+
 fn test_test_suite() -> anyhow::Result<()> {
     let xml = include_str!("./schemas/test_suite.rng.xml");
 
@@ -34,8 +32,6 @@ fn test_incremental() -> anyhow::Result<()> {
     let xml = include_str!("./schemas/incremental.rng.xml");
 
     let output: Grammar = de::from_str(&xml)?;
-
-    info!("Parsed\n{:?}", output);
 
     Ok(())
 }
