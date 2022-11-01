@@ -20,4 +20,42 @@
             </zeroOrMore>
         </element>
     </define>
+
+    <define name="testCase">
+        <element name="testCase">
+            <ref name="header" />
+
+            <ref name="resources" />
+
+            <choice>
+
+                <!-- Incorrect schema -->
+                <element name="incorrect">
+                    <ref name="dtd" />
+                    <ref name="anyElement" />
+                </element>
+
+                <!-- Correct schema and test cases -->
+                <group>
+                    <ref name="correct" />
+                    <zeroOrMore>
+                        <choice>
+                            <!-- Valid test cases -->
+                            <element name="valid">
+                                <ref name="dtd" />
+                                <ref name="anyElement" />
+                            </element>
+                            <!-- Invalid test cases -->
+                            <element name="invalid">
+                                <ref name="dtd" />
+                                <ref name="anyElement" />
+                            </element>
+                        </choice>
+                    </zeroOrMore>
+                </group>
+
+            </choice>
+
+        </element>
+    </define>
 </grammar>

@@ -29,7 +29,7 @@ fn test_test_suite() -> anyhow::Result<()> {
 }
 
 #[test]
-#[ignore]
+
 fn test_incremental() -> anyhow::Result<()> {
     let xml = include_str!("./schemas/incremental.rng.xml");
 
