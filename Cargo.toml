@@ -20,7 +20,7 @@ serde_with = "2"
 codegen = "0.2"
 convert_case = "0.6"
 anyhow = "1"
-quick-xml = { version = "0.26", features = ["serialize"] }
+quick-xml = { version = "0.26", features = ["serialize", "overlapped-lists"] }
 serde = { version = "1", features = ["derive"] }
 
 
