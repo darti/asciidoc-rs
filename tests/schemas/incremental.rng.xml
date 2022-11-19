@@ -58,4 +58,31 @@
 
         </element>
     </define>
+
+    <define name="correct">
+        <element name="correct">
+            <ref name="dtd" />
+            <externalRef href="relaxng.rng" />
+        </element>
+    </define>
+
+    <define name="any">
+        <zeroOrMore>
+            <choice>
+                <ref name="anyElement" />
+                <attribute>
+                    <anyName />
+                    <text />
+                </attribute>
+                <text />
+            </choice>
+        </zeroOrMore>
+    </define>
+    <!-- 
+    <define name="anyElement">
+        <element>
+            <anyName />
+            <ref name="any" />
+        </element>
+    </define> -->
 </grammar>

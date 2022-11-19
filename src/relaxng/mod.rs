@@ -1,11 +1,9 @@
-use codegen::Scope;
-use convert_case::{Case, Casing};
 use derive_builder::Builder;
-use log::info;
-use quick_xml::{de, se};
+
+use quick_xml::de;
 use serde::{Deserialize, Serialize};
 
-use self::error::{RelaxNgError, RelaxNgResult};
+use self::error::RelaxNgResult;
 
 pub mod error;
 
@@ -59,19 +57,56 @@ pub enum Pattern {
     },
 
     Element {
-        name: String,
+        #[serde(default)]
+        #[serde(rename = "@name")]
+        name: Option<String>,
+
+        #[serde(alias = "anyName")]
+        // #[serde(alias = "name")]
+        #[serde(alias = "choice")]
+        #[serde(default)]
+        #[serde(rename = "$value")]
+        name_class: Option<NameClass>,
+
+        #[serde(alias = "ref")]
         #[serde(rename = "$value", default)]
         pattern: Vec<Pattern>,
     },
 
     Attribute {
         #[serde(default)]
+        #[serde(rename = "@name")]
         name: Option<String>,
+
+        #[serde(alias = "anyName")]
+        // #[serde(alias = "name")]
+        #[serde(alias = "choice")]
         #[serde(default)]
         name_class: Option<NameClass>,
 
+        #[serde(default)]
+        pattern: Option<Box<Pattern>>,
+    },
+
+    Text,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub enum NameClass {
+    Name(String),
+
+    AnyName {
+        // #[serde(rename = "$unflatten=except", default)]
+        except: Option<Box<NameClass>>,
+    },
+    // NsName {
+    //     #[serde(default)]
+    //     except: Option<ExceptNameClass>,
+    // },
+    Choice {
         #[serde(rename = "$value", default)]
-        pattern: Box<Pattern>,
+        names: Vec<NameClass>,
     },
 }
 
@@ -107,24 +142,25 @@ pub fn choice(pattern: Vec<Pattern>) -> Pattern {
 
 pub fn element(name: &str, pattern: Vec<Pattern>) -> Pattern {
     Pattern::Element {
-        name: name.into(),
+        name: Some(name.into()),
+        name_class: None,
         pattern,
     }
 }
 
-pub fn attribute(name: &str, pattern: Pattern) -> Pattern {
+pub fn attribute(name: &str, pattern: Option<Pattern>) -> Pattern {
     Pattern::Attribute {
         name: Some(name.into()),
         name_class: None,
-        pattern: Box::new(pattern),
+        pattern: pattern.map(Box::new),
     }
 }
 
-pub fn attribute_with_name_class(name_class: NameClass, pattern: Pattern) -> Pattern {
+pub fn attribute_with_name_class(name_class: NameClass, pattern: Option<Pattern>) -> Pattern {
     Pattern::Attribute {
         name: None,
         name_class: Some(name_class),
-        pattern: Box::new(pattern),
+        pattern: pattern.map(Box::new),
     }
 }
 
@@ -142,20 +178,6 @@ impl Define {
             pattern,
         }
     }
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub enum NameClass {
-    Name(String),
-    AnyName {
-        except: Option<Box<NameClass>>,
-    },
-    Choice {
-        #[serde(rename = "$value", default)]
-        names: Vec<NameClass>,
-    },
-    Except(Vec<NameClass>),
 }
 
 pub fn generate(s: &str) -> RelaxNgResult<Grammar> {

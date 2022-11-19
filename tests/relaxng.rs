@@ -14,7 +14,7 @@ fn test_3_1() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[test]
+// #[test]
 
 fn test_test_suite() -> anyhow::Result<()> {
     let xml = include_str!("./schemas/test_suite.rng.xml");
