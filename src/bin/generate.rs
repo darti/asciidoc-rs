@@ -8,14 +8,12 @@ use asciidoc_rs::relaxng::generate;
 fn main() -> anyhow::Result<()> {
     Builder::from_env(Env::new().default_filter_or("info")).init();
 
-    let input = "./schemas/docbook.rnc";
+    let input = "./schemas/relaxng.rng.xml";
     info!("parsing {}", input);
 
     let src = fs::read_to_string(input)?;
 
     let g = generate(&src)?;
-
-    info!("{:?}", g);
 
     Ok(())
 }
