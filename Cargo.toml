@@ -20,8 +20,8 @@ serde_with = "2"
 codegen = "0.2"
 convert_case = "0.6"
 anyhow = "1"
-quick-xml = { version = "0.26", features = ["serialize", "overlapped-lists"] }
-serde = { version = "1", features = ["derive"] }
+relaxng-syntax = { version = "0.1.0", path = "../../cloned/relaxng-rust/relaxng-syntax" }
+relaxng-model = { version = "0.1.0", path = "../../cloned/relaxng-rust/relaxng-model" }
 
 
 [dev-dependencies]
