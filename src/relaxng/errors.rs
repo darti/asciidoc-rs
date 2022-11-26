@@ -18,7 +18,7 @@ pub enum RelaxNgError {
     MissingStart,
 
     #[error("parse error")]
-    ParseError,
+    ParseError(#[from] quick_xml::Error),
 }
 
 pub type RelaxNgResult<T> = Result<T, RelaxNgError>;
