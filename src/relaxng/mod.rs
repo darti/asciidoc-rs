@@ -60,7 +60,7 @@ where
             }
         }
 
-        // self.buf.clear();
+        buf.clear();
     }
 
     Ok(())
