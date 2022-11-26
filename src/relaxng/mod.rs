@@ -13,7 +13,7 @@ use quick_xml::reader::Reader;
 
 use self::errors::RelaxNgResult;
 
-type Transition = Rc<dyn Fn(Event<'_>) -> NextOp>;
+type Transition = Rc<dyn for<'a> Fn(Event<'a>) -> NextOp>;
 
 enum NextOp {
     Push(Transition),
