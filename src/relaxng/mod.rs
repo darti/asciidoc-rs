@@ -15,6 +15,15 @@ use self::errors::RelaxNgResult;
 
 type Transition = Rc<dyn for<'a> Fn(Event<'a>) -> NextOp>;
 
+macro_rules! attribute {
+    ($a:expr, $k:expr) => {
+        $a.try_get_attribute($k)
+            .ok()
+            .flatten()
+            .and_then(|a| a.unescape_value().ok())
+    };
+}
+
 enum NextOp {
     Push(Transition),
     Nop,
@@ -69,17 +78,8 @@ where
 fn init_state<'a>(evt: Event<'a>) -> NextOp {
     match evt {
         Event::Start(e) if e.name().as_ref() == b"define" => {
-            if let Some(n) = e
-                .try_get_attribute(b"name")
-                .ok()
-                .flatten()
-                .and_then(|a| a.unescape_value().ok())
-            {
-                let n = n.to_string();
-
-                let c = define(n.clone());
-
-                NextOp::Push(c)
+            if let Some(n) = attribute!(e, b"name") {
+                NextOp::Push(define(n.to_string()))
             } else {
                 NextOp::Nop
             }
