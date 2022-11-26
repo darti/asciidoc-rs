@@ -9,29 +9,46 @@ https://relaxng.org/spec-20011203.html#IDAODZR
 [source]
 ----
 
-grammar	  ::=  	<grammar> <start> top </start> define* </grammar>
-define	  ::=  	<define name="NCName"> <element> nameClass top </element> </define>
-top	  ::=  	<notAllowed/>
-| pattern
-pattern	  ::=  	<empty/>
-| nonEmptyPattern
-nonEmptyPattern	  ::=  	<text/>
-| <data type="NCName" datatypeLibrary="anyURI"> param* [exceptPattern] </data>
-| <value datatypeLibrary="anyURI" type="NCName" ns="string"> string </value>
-| <list> pattern </list>
-| <attribute> nameClass pattern </attribute>
+
+pattern	  ::=  	<element name="QName"> pattern+ </element>
+| <element> nameClass pattern+ </element>
+| <attribute name="QName"> [pattern] </attribute>
+| <attribute> nameClass [pattern] </attribute>
+| <group> pattern+ </group>
+| <interleave> pattern+ </interleave>
+| <choice> pattern+ </choice>
+| <optional> pattern+ </optional>
+| <zeroOrMore> pattern+ </zeroOrMore>
+| <oneOrMore> pattern+ </oneOrMore>
+| <list> pattern+ </list>
+| <mixed> pattern+ </mixed>
 | <ref name="NCName"/>
-| <oneOrMore> nonEmptyPattern </oneOrMore>
-| <choice> pattern nonEmptyPattern </choice>
-| <group> nonEmptyPattern nonEmptyPattern </group>
-| <interleave> nonEmptyPattern nonEmptyPattern </interleave>
+| <parentRef name="NCName"/>
+| <empty/>
+| <text/>
+| <value [type="NCName"]> string </value>
+| <data type="NCName"> param* [exceptPattern] </data>
+| <notAllowed/>
+| <externalRef href="anyURI"/>
+| <grammar> grammarContent* </grammar>
 param	  ::=  	<param name="NCName"> string </param>
-exceptPattern	  ::=  	<except> pattern </except>
-nameClass	  ::=  	<anyName> [exceptNameClass] </anyName>
-| <nsName ns="string"> [exceptNameClass] </nsName>
-| <name ns="string"> NCName </name>
-| <choice> nameClass nameClass </choice>
-exceptNameClass	  ::=  	<except> nameClass </except>
+exceptPattern	  ::=  	<except> pattern+ </except>
+grammarContent	  ::=  	start
+| define
+| <div> grammarContent* </div>
+| <include href="anyURI"> includeContent* </include>
+includeContent	  ::=  	start
+| define
+| <div> includeContent* </div>
+start	  ::=  	<start [combine="method"]> pattern </start>
+define	  ::=  	<define name="NCName" [combine="method"]> pattern+ </define>
+method	  ::=  	choice
+| interleave
+nameClass	  ::=  	<name> QName </name>
+| <anyName> [exceptNameClass] </anyName>
+| <nsName> [exceptNameClass] </nsName>
+| <choice> nameClass+ </choice>
+exceptNameClass	  ::=  	<except> nameClass+ </except>
 ----
 
 == Links
