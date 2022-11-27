@@ -22,5 +22,5 @@ where
 pub enum Decl {
     Namespace(String, String),
     DefaultNamespace(Option<String>, String),
-    Datatype(String, String),
+    Datatypes(String, String),
 }

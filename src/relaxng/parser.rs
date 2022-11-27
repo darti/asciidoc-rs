@@ -1,8 +1,9 @@
 use log::info;
 use nom::{
     bytes::complete::{escaped, tag, take_until},
-    character::complete::{self, alphanumeric1, char, multispace0, one_of},
-    combinator::map_opt,
+    character::complete::{self, alphanumeric1, char, multispace0, multispace1, one_of},
+    combinator::{map_opt, opt},
+    multi::{many0, separated_list0},
     sequence::{delimited, preceded, separated_pair, terminated},
     IResult,
 };
@@ -17,7 +18,7 @@ pub type Span<'a> = LocatedSpan<&'a str>;
 pub fn parse(s: &str) -> RelaxNgResult<()> {
     let input = Span::new(s);
 
-    let r = decl(input);
+    let r = decls(input);
 
     info!("{:?}", r.ok());
 
@@ -42,6 +43,30 @@ pub(crate) fn namespace(input: Span) -> IResult<Span, Decl> {
     Ok((input, Decl::Namespace(id.to_string(), ns.to_string())))
 }
 
-pub(crate) fn decl(input: Span) -> IResult<Span, Decl> {
-    alt((namespace,))(input)
+pub(crate) fn default_namespace(input: Span) -> IResult<Span, Decl> {
+    let (input, _) = terminated(tag("default"), multispace0)(input)?;
+    let (input, _) = terminated(tag("namespace"), multispace0)(input)?;
+
+    let (input, id) = opt(terminated(alphanumeric1, multispace0))(input)?;
+    let (input, _) = terminated(char('='), multispace0)(input)?;
+    let (input, ns) = terminated(quoted, multispace0)(input)?;
+
+    Ok((
+        input,
+        Decl::DefaultNamespace(id.map(|i| i.to_string()), ns.to_string()),
+    ))
+}
+
+pub(crate) fn datatypes(input: Span) -> IResult<Span, Decl> {
+    let (input, _) = terminated(tag("datatypes"), multispace0)(input)?;
+
+    let (input, id) = terminated(alphanumeric1, multispace0)(input)?;
+    let (input, _) = terminated(char('='), multispace0)(input)?;
+    let (input, ns) = terminated(quoted, multispace0)(input)?;
+
+    Ok((input, Decl::Datatypes(id.to_string(), ns.to_string())))
+}
+
+pub(crate) fn decls(input: Span) -> IResult<Span, Vec<Decl>> {
+    many0(alt((namespace, default_namespace, datatypes)))(input)
 }
