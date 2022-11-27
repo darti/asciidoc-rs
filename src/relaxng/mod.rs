@@ -24,6 +24,12 @@ macro_rules! attribute {
     };
 }
 
+macro_rules! tag {
+    ($e:expr, $t:expr) => {
+        e.name().as_ref() == t
+    };
+}
+
 enum NextOp {
     Push(Transition),
     Nop,
@@ -95,7 +101,7 @@ fn define(name: String) -> Transition {
         match evt {
             Event::Start(e) if e.name().as_ref() == b"element" => {
                 // self.element(attribute_by_name(&mut attrs, b"name").to_string)
-                NextOp::Nop
+                NextOp::Push(Rc::new(element))
             }
 
             Event::End(e) if e.name().as_ref() == b"define" => NextOp::Pop,
@@ -104,4 +110,12 @@ fn define(name: String) -> Transition {
     }
 
     Rc::new(define_inner)
+}
+
+fn element<'a>(evt: Event<'a>) -> NextOp {
+    info!("{}", "element".blue().bold());
+    match evt {
+        Event::Start(e) if e.name().as_ref() == b"element" => {}
+        _ => NextOp::Fail,
+    }
 }
