@@ -11,6 +11,7 @@ pretty_env_logger = "0.4"
 
 lazy_static = "1"
 log = "0.4"
+colored = "2"
 
 xmlns = "0.1"
 url = { version = "2", features = ["serde"] }
@@ -21,8 +22,9 @@ codegen = "0.2"
 convert_case = "0.6"
 anyhow = "1"
 
-quick-xml = "0.26"
-colored = "2"
+
+nom = "7"
+nom_locate = "4"
 
 
 [dev-dependencies]

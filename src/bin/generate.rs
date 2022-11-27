@@ -8,7 +8,7 @@ use asciidoc_rs::relaxng::generate;
 fn main() -> anyhow::Result<()> {
     Builder::from_env(Env::new().default_filter_or("info")).init();
 
-    let file = "./tests/schemas/test_suite.rng.xml";
+    let file = "./schemas/docbook.rnc";
     info!("parsing {}", file);
 
     let _g = generate(File::open(file)?)?;

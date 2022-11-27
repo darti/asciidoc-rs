@@ -17,8 +17,8 @@ pub enum RelaxNgError {
     #[error("missing <start /> in <grammar /> ")]
     MissingStart,
 
-    #[error("parse error")]
-    ParseError(#[from] quick_xml::Error),
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
 }
 
 pub type RelaxNgResult<T> = Result<T, RelaxNgError>;
