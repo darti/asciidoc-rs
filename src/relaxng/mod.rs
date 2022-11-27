@@ -24,3 +24,41 @@ pub enum Decl {
     DefaultNamespace(Option<String>, String),
     Datatypes(String, String),
 }
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum AssignMethod {
+    Assign,
+    And,
+    Or,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum GrammarContent {
+    Start(AssignMethod, Pattern),
+    Define,
+    Div,
+    Include,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum Pattern {
+    Element,
+    Attribute,
+    List,
+    And,
+    Or,
+    OneOrZero,
+    Many0,
+    Many1,
+    Lst,
+    Mixed,
+    Identifier(String),
+    Parent(String),
+    Empty,
+    Text,
+    Datatype,
+    DataTypeExcl,
+    NotAllowed,
+    External,
+    Grammar(Vec<GrammarContent>),
+}

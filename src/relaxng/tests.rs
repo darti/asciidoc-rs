@@ -3,7 +3,7 @@ use ctor::ctor;
 use indoc::indoc;
 use pretty_env_logger::env_logger::{Builder, Env};
 
-use crate::relaxng::{parser::*, Decl};
+use crate::relaxng::{parser::*, *};
 
 #[ctor]
 fn init_logger() {
@@ -108,5 +108,19 @@ fn test_decls() {
                 "http://www.w3.org/2001/XMLSchema-datatypes".into()
             )
         ]
+    );
+}
+
+#[test]
+fn test_start() {
+    let i = Span::new(indoc! {r#"
+        start = pattern
+    "#});
+
+    let (_, o) = start(i).unwrap();
+
+    assert_eq!(
+        o,
+        GrammarContent::Start(AssignMethod::Assign, Pattern::Identifier("pattern".into()))
     );
 }
