@@ -150,13 +150,11 @@ pub(crate) fn pattern(input: Span) -> IResult<Span, Pattern> {
 //     let name = map(alphanumeric1, |n| NameClass::Name(n));
 // }
 
-pub(crate) fn identifier_or_keyword(input: Span) -> IResult<Span, Pattern> {
-    let (input, i) = alphanumeric1(input)?;
-
-    Ok((input, Pattern::Identifier(i.to_string())))
+pub(crate) fn identifier_or_keyword(input: Span) -> IResult<Span, Span> {
+    alt((identifier, keyword))(input)
 }
 
-pub(crate) fn identifier(input: Span) -> IResult<Span, String> {
+pub(crate) fn identifier(input: Span) -> IResult<Span, Span> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"[_\p{XID_Start}][\._\p{XID_Continue}]*").unwrap();
     }
@@ -171,7 +169,7 @@ pub(crate) fn identifier(input: Span) -> IResult<Span, String> {
 }
 
 pub(crate) fn keyword(input: Span) -> IResult<Span, Span> {
-    recognize(alt((
+    alt((
         tag("attribute"),
         tag("default"),
         tag("datatypes"),
@@ -191,5 +189,5 @@ pub(crate) fn keyword(input: Span) -> IResult<Span, Span> {
         tag("string"),
         tag("text"),
         tag("token"),
-    )))(input)
+    ))(input)
 }
