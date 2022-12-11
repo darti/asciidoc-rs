@@ -71,14 +71,17 @@ identifierOrKeyword	  ::=  	identifier
 identifier	  ::=  	(NCName - keyword)
 | quotedIdentifier
 quotedIdentifier	  ::=  	"\" NCName
+
 CName	  ::=  	NCName ":" NCName
 nsName	  ::=  	NCName ":*"
 anyName	  ::=  	"*"
+
 literal	  ::=  	literalSegment ("~" literalSegment)+
 literalSegment	  ::=  	'"' (Char - ('"' | newline))* '"'
 | "'" (Char - ("'" | newline))* "'"
 | '"""' (['"'] ['"'] (Char - '"'))* '"""'
 | "'''" (["'"] ["'"] (Char - "'"))* "'''"
+
 keyword	  ::=  	"attribute"
 | "default"
 | "datatypes"

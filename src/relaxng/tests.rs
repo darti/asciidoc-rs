@@ -4,6 +4,7 @@ use indoc::indoc;
 use pretty_env_logger::env_logger::{Builder, Env};
 
 use crate::relaxng::{parser::*, *};
+use nom::error::{Error as NomError, ErrorKind, ParseError};
 
 #[ctor]
 fn init_logger() {
@@ -21,6 +22,39 @@ fn test_quoted() {
     assert_eq!(
         o.to_string(),
         "http://relaxng.org/ns/compatibility/annotations/1.0"
+    );
+}
+
+#[test]
+fn test_identifier_simple() {
+    let i = Span::new("maurice");
+
+    let (_, o) = identifier(i).unwrap();
+
+    assert_eq!(o.to_string(), "maurice");
+}
+
+#[test]
+fn test_identifier_with_dots() {
+    let i = Span::new("good_id.666");
+
+    let (_, o) = identifier(i).unwrap();
+
+    assert_eq!(o.to_string(), "good_id.666");
+}
+
+#[test]
+fn test_identifier_keyword() {
+    let i = Span::new("attribute");
+
+    let r = identifier(i);
+
+    assert_eq!(
+        r,
+        Err(nom::Err::Error(NomError::from_error_kind(
+            i,
+            ErrorKind::RegexpCapture
+        ),))
     );
 }
 
@@ -111,16 +145,16 @@ fn test_decls() {
     );
 }
 
-#[test]
-fn test_start() {
-    let i = Span::new(indoc! {r#"
-        start = pattern
-    "#});
+// #[test]
+// fn test_start() {
+//     let i = Span::new(indoc! {r#"
+//         start = pattern
+//     "#});
 
-    let (_, o) = start(i).unwrap();
+//     let (_, o) = start(i).unwrap();
 
-    assert_eq!(
-        o,
-        GrammarContent::Start(AssignMethod::Assign, Pattern::Identifier("pattern".into()))
-    );
-}
+//     assert_eq!(
+//         o,
+//         GrammarContent::Start(AssignMethod::Assign, Pattern::Identifier("pattern".into()))
+//     );
+// }

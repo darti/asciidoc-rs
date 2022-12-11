@@ -2,19 +2,46 @@ use log::info;
 use nom::{
     bytes::complete::{escaped, is_not, tag, take_until},
     character::complete::{self, alphanumeric1, char, multispace0, multispace1, one_of},
-    combinator::{map, map_opt, not, opt, recognize, verify},
-    error::ParseError,
+    combinator::{cond, map, map_opt, not, opt, recognize, verify},
+    error::{ErrorKind, ParseError},
     multi::{many0, separated_list0},
     sequence::{delimited, preceded, separated_pair, terminated},
-    IResult,
+    IResult, Slice,
 };
 use nom_locate::LocatedSpan;
 
+use nom::error::Error as NomError;
+
 use nom::branch::alt;
 
-use super::{errors::RelaxNgResult, AssignMethod, Decl, GrammarContent, Pattern};
+use lazy_static::lazy_static;
+use regex::Regex;
+
+use super::{errors::RelaxNgResult, AssignMethod, Decl, GrammarContent, NameClass, Pattern};
 
 pub type Span<'a> = LocatedSpan<&'a str>;
+
+const KEYWORDS: [&'static str; 19] = [
+    "attribute",
+    "default",
+    "datatypes",
+    "div",
+    "element",
+    "empty",
+    "external",
+    "grammar",
+    "include",
+    "inherit",
+    "list",
+    "mixed",
+    "namespace",
+    "notAllowed",
+    "parent",
+    "start",
+    "string",
+    "text",
+    "token",
+];
 
 pub fn parse(s: &str) -> RelaxNgResult<()> {
     let input = Span::new(s);
@@ -106,11 +133,41 @@ pub(crate) fn include(input: Span) -> IResult<Span, GrammarContent> {
 }
 
 pub(crate) fn pattern(input: Span) -> IResult<Span, Pattern> {
-    alt((map(identifier, |i| Pattern::Identifier(i.to_string())),))(input)
+    // alt((identifier,))(input)
+    todo!()
 }
 
-pub(crate) fn identifier(input: Span) -> IResult<Span, Span> {
-    alphanumeric1(input)
+// => Patterns
+// pub(crate) fn element(input: Span) -> IResult<Span, Pattern> {
+//     let (input, i) = alphanumeric1(input)?;
+
+//     Ok((input, Pattern::Element(i.to_string())))
+// }
+
+// <= Patterns
+
+// pub(crate) fn name_class(input: Span) -> IResult<Span, NameClass> {
+//     let name = map(alphanumeric1, |n| NameClass::Name(n));
+// }
+
+pub(crate) fn identifier_or_keyword(input: Span) -> IResult<Span, Pattern> {
+    let (input, i) = alphanumeric1(input)?;
+
+    Ok((input, Pattern::Identifier(i.to_string())))
+}
+
+pub(crate) fn identifier(input: Span) -> IResult<Span, String> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"[_\p{XID_Start}][\._\p{XID_Continue}]*").unwrap();
+    }
+
+    match RE.find(&input) {
+        Some(id) if KEYWORDS.contains(&id.as_str()) => Err(nom::Err::Error(
+            NomError::from_error_kind(input.clone(), ErrorKind::RegexpCapture),
+        )),
+        Some(id) => Ok((input.slice(id.end()..), id.as_str().into())),
+        None => todo!(),
+    }
 }
 
 pub(crate) fn keyword(input: Span) -> IResult<Span, Span> {
