@@ -5,7 +5,7 @@ use nom::{
     combinator::{cond, map, map_opt, not, opt, recognize, verify},
     error::{ErrorKind, ParseError},
     multi::{many0, separated_list0},
-    sequence::{delimited, preceded, separated_pair, terminated},
+    sequence::{delimited, preceded, separated_pair, terminated, tuple},
     IResult, Slice,
 };
 use nom_locate::LocatedSpan;
@@ -133,13 +133,15 @@ pub(crate) fn include(input: Span) -> IResult<Span, GrammarContent> {
 }
 
 pub(crate) fn pattern(input: Span) -> IResult<Span, Pattern> {
-    // alt((identifier,))(input)
-    todo!()
+    // let elt = seq(terminated(tag("element"), multispace0),);
+    let id = map(identifier, |i| Pattern::Identifier(i.to_string()));
+
+    alt((id,))(input)
 }
 
 // => Patterns
 // pub(crate) fn element(input: Span) -> IResult<Span, Pattern> {
-//     let (input, i) = alphanumeric1(input)?;
+//     let elt = seq(terminated(tag("element"), multispace0),);
 
 //     Ok((input, Pattern::Element(i.to_string())))
 // }
@@ -149,6 +151,19 @@ pub(crate) fn pattern(input: Span) -> IResult<Span, Pattern> {
 // pub(crate) fn name_class(input: Span) -> IResult<Span, NameClass> {
 //     let name = map(alphanumeric1, |n| NameClass::Name(n));
 // }
+
+pub(crate) fn name_class(input: Span) -> IResult<Span, NameClass> {
+    let name = map(identifier_or_keyword, |n| NameClass::Name(n.to_string()));
+
+    alt((
+        name,
+        delimited(
+            char('('),
+            delimited(multispace0, name_class, multispace0),
+            char(')'),
+        ),
+    ))(input)
+}
 
 pub(crate) fn identifier_or_keyword(input: Span) -> IResult<Span, Span> {
     alt((identifier, keyword))(input)

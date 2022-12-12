@@ -13,9 +13,11 @@ https://www.oasis-open.org/committees/relax-ng/compact-20021121.html
 
 
 topLevel	  ::=  	decl* (pattern | grammarContent*)
+
 decl	  ::=  	"namespace" identifierOrKeyword "=" namespaceURILiteral
 | "default" "namespace" [identifierOrKeyword] "=" namespaceURILiteral
 | "datatypes" identifierOrKeyword "=" literal
+
 pattern	  ::=  	"element" nameClass "{" pattern "}"
 | "attribute" nameClass "{" pattern "}"
 | pattern ("," pattern)+
@@ -36,8 +38,11 @@ pattern	  ::=  	"element" nameClass "{" pattern "}"
 | "external" anyURILiteral [inherit]
 | "grammar" "{" grammarContent* "}"
 | "(" pattern ")"
+
 param	  ::=  	identifierOrKeyword "=" literal
+
 exceptPattern	  ::=  	"-" pattern
+
 grammarContent	  ::=  	start
 | define
 | "div" "{" grammarContent* "}"
@@ -45,6 +50,7 @@ grammarContent	  ::=  	start
 includeContent	  ::=  	define
 | start
 | "div" "{" includeContent* "}"
+
 start	  ::=  	"start" assignMethod pattern
 define	  ::=  	identifier assignMethod pattern
 assignMethod	  ::=  	"="
@@ -55,12 +61,16 @@ nameClass	  ::=  	name
 | anyName [exceptNameClass]
 | nameClass "|" nameClass
 | "(" nameClass ")"
+
 name	  ::=  	identifierOrKeyword
 | CName
+
 exceptNameClass	  ::=  	"-" nameClass
+
 datatypeName	  ::=  	CName
 | "string"
 | "token"
+
 datatypeValue	  ::=  	literal
 anyURILiteral	  ::=  	literal
 namespaceURILiteral	  ::=  	literal
