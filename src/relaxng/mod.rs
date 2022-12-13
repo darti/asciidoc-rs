@@ -1,9 +1,6 @@
 pub mod errors;
 pub mod parser;
 
-#[cfg(test)]
-mod tests;
-
 use std::io::Read;
 
 use self::{errors::RelaxNgResult, parser::parse};
