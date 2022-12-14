@@ -56,6 +56,7 @@ define	  ::=  	identifier assignMethod pattern
 assignMethod	  ::=  	"="
 | "|="
 | "&="
+
 nameClass	  ::=  	name
 | nsName [exceptNameClass]
 | anyName [exceptNameClass]
@@ -78,8 +79,10 @@ namespaceURILiteral	  ::=  	literal
 inherit	  ::=  	"inherit" "=" identifierOrKeyword
 identifierOrKeyword	  ::=  	identifier
 | keyword
+
 identifier	  ::=  	(NCName - keyword)
 | quotedIdentifier
+
 quotedIdentifier	  ::=  	"\" NCName
 
 CName	  ::=  	NCName ":" NCName

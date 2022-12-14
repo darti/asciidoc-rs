@@ -3,8 +3,9 @@ use nom::{
     bytes::complete::{escaped, tag, take_until},
     character::complete::{char, multispace0, one_of},
     combinator::map,
+    error::ParseError,
     sequence::{delimited, terminated},
-    IResult,
+    IResult, Parser,
 };
 
 use crate::relaxng::AssignMethod;
@@ -25,6 +26,14 @@ pub(crate) fn quoted(input: Span) -> IResult<Span, Span> {
         escaped(take_until("\""), '\\', one_of(r#""n\"#)),
         terminated(char('"'), multispace0),
     )(input)
+}
+
+pub(crate) fn trim<'a, P, O, E>(parser: P) -> impl FnMut(Span<'a>) -> IResult<Span<'a>, O, E>
+where
+    E: ParseError<Span<'a>>,
+    P: Parser<Span<'a>, O, E>,
+{
+    delimited(multispace0, parser, multispace0)
 }
 
 #[cfg(test)]
