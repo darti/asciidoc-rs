@@ -40,7 +40,8 @@ pub enum GrammarContent {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum NameClass {
     Name(String),
-    CName(String, Option<String>),
+    CName(String, String),
+    NsName(String),
     AnyName,
     Or(Box<NameClass>, Box<NameClass>),
     Except(Box<NameClass>, Box<NameClass>),
