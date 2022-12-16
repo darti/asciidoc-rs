@@ -36,7 +36,7 @@ pub(crate) fn name_class(input: Span) -> IResult<Span, NameClass> {
 
     let parenthesis = delimited(char('('), trim(name_class), char(')'));
 
-    alt((name, cname, parenthesis))(input)
+    alt((name, cname, parenthesis, anyname, nsname))(input)
 }
 
 #[cfg(test)]
